@@ -1,0 +1,87 @@
+# Contributor: Andreas Baumann <abaumann at yahoo dot com>
+# Maintainer: Andreas Baumann <abaumann at yahoo dot com>
+pkgname=wolframe
+pkgver=0.0.3
+pkgrel=1
+pkgdesc="A flexible client-server ecosystem for business applications."
+license=('GPL3')
+arch=('i686' 'x86_64' 'armv6h')
+url="http://wolframe.net/"
+depends=('boost>=1.48' 'boost-libs>=1.48' 'openssl' 'pam' 'libsasl' 
+         'sqlite3' 'postgresql-libs' 'libxml2' 'libxslt'
+         'python')
+makedepends=('docbook-xsl' 'doxygen' 'fop' 'graphviz' 'dia')
+checkdepends=('expect' 'inetutils' 'diffutils')
+backup=('etc/wolframe/wolframe.conf')
+install='wolframe.install' 
+source=(
+  "http://sourceforge.net/projects/wolframe/files/${pkgname}/${pkgname}-${pkgver}.tar.gz"
+  'wolframed.service'
+)
+
+md5sums=('56314aaaa2bc5fda41107e80c5ce778b'
+         'cc146a28908aad55f156860340934095')
+
+package() {
+  cd ${srcdir}/${pkgname}-${pkgver}
+
+  msg "Installing.."
+  make \
+    WITH_SSL=1 WITH_EXPECT=1 WITH_PAM=1 WITH_SASL=1 \
+    WITH_SYSTEM_SQLITE3=1 WITH_PGSQL=1 WITH_LUA=1 WITH_LIBXML2=1 \
+    WITH_LIBXSLT=1 WITH_LOCAL_LIBHPDF=1 WITH_ICU=1 \
+    WITH_LOCAL_FREEIMAGE=1 WITH_PYTHON=1 WITH_CJSON=1 \
+    WITH_TEXTWOLF=1 RELEASE=1 \
+    DESTDIR=${pkgdir} prefix=/usr sbindir=/usr/bin \
+    sysconfdir=/etc \
+    install
+
+  install -D -m644 ${srcdir}/wolframed.service \
+    ${pkgdir}/usr/lib/systemd/system/wolframed.service
+}
+
+check() {
+  cd ${srcdir}/${pkgname}-${pkgver}
+
+  msg "Testing..."
+  make test \
+    WITH_SSL=1 WITH_EXPECT=1 WITH_PAM=1 WITH_SASL=1 \
+    WITH_SYSTEM_SQLITE3=1 WITH_PGSQL=1 WITH_LUA=1 WITH_LIBXML2=1 \
+    WITH_LIBXSLT=1 WITH_LOCAL_LIBHPDF=1 WITH_ICU=1 \
+    WITH_LOCAL_FREEIMAGE=1 WITH_PYTHON=1 WITH_CJSON=1 \
+    WITH_TEXTWOLF=1 RELEASE=1 \
+    DEFAULT_MODULE_LOAD_DIR=/usr/lib/wolframe/modules \
+    RELEASE=1 \
+    LDFLAGS=-Wl,-rpath=/usr/lib/wolframe,--enable-new-dtags
+}
+
+build() {
+  cd ${srcdir}/${pkgname}-${pkgver}
+
+  msg "Generating dependencies..."
+  make depend \
+    WITH_SSL=1 WITH_EXPECT=1 WITH_PAM=1 WITH_SASL=1 \
+    WITH_SYSTEM_SQLITE3=1 WITH_PGSQL=1 WITH_LUA=1 WITH_LIBXML2=1 \
+    WITH_LIBXSLT=1 WITH_LOCAL_LIBHPDF=1 WITH_ICU=1 \
+    WITH_LOCAL_FREEIMAGE=1 WITH_PYTHON=1 WITH_CJSON=1 \
+    WITH_TEXTWOLF=1 RELEASE=1 \
+    DEFAULT_MODULE_LOAD_DIR=/usr/lib/wolframe/modules \
+    RELEASE=1 \
+    LDFLAGS=-Wl,-rpath=/usr/lib/wolframe,--enable-new-dtags
+
+  msg "Building..."
+  make \
+    WITH_SSL=1 WITH_EXPECT=1 WITH_PAM=1 WITH_SASL=1 \
+    WITH_SYSTEM_SQLITE3=1 WITH_PGSQL=1 WITH_LUA=1 WITH_LIBXML2=1 \
+    WITH_LIBXSLT=1 WITH_LOCAL_LIBHPDF=1 WITH_ICU=1 \
+    WITH_LOCAL_FREEIMAGE=1 WITH_PYTHON=1 WITH_CJSON=1 \
+    WITH_TEXTWOLF=1 RELEASE=1 \
+    DEFAULT_MODULE_LOAD_DIR=/usr/lib/wolframe/modules \
+    RELEASE=1 \
+    LDFLAGS=-Wl,-rpath=/usr/lib/wolframe,--enable-new-dtags
+
+#  msg "Building documentation.."
+#  cd docs
+#  make doc
+#  cd ..
+}
